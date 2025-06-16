@@ -28,6 +28,7 @@ export default function Home() {
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [inventory, setInventory] = useState<Book[]>([]);
   const [isLoadingInventory, setIsLoadingInventory] = useState<boolean>(true);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   // Fetch inventory function
   const fetchInventory = async () => {
@@ -149,6 +150,30 @@ export default function Home() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // Filter inventory based on search term
+  const filteredInventory = inventory.filter((book) =>
+    book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    book.author.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Function to highlight search terms
+  const highlightText = (text: string, searchTerm: string) => {
+    if (!searchTerm) return text;
+    
+    const regex = new RegExp(`(${searchTerm})`, 'gi');
+    const parts = text.split(regex);
+    
+    return parts.map((part, index) => 
+      regex.test(part) ? (
+        <mark key={index} className="bg-yellow-200 px-1 rounded">
+          {part}
+        </mark>
+      ) : (
+        part
+      )
+    );
   };
 
   return (
@@ -327,6 +352,41 @@ export default function Home() {
           <p className="text-gray-600">Your book collection</p>
         </div>
 
+        {/* Search Bar */}
+        {!isLoadingInventory && inventory.length > 0 && (
+          <div className="mb-8 max-w-md mx-auto">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                placeholder="Search by title or author..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500 text-gray-700"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  <svg className="h-5 w-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+            {searchTerm && (
+              <p className="mt-2 text-sm text-gray-600 text-center">
+                {filteredInventory.length} of {inventory.length} books match "{searchTerm}"
+              </p>
+            )}
+          </div>
+        )}
+
         {isLoadingInventory ? (
           <div className="text-center py-8">
             <div className="inline-flex items-center space-x-2">
@@ -344,17 +404,33 @@ export default function Home() {
               <p className="text-gray-500">Add a book to get started!</p>
             </div>
           </div>
+        ) : filteredInventory.length === 0 ? (
+          <div className="text-center py-12 bg-white rounded-lg shadow-md border border-gray-200">
+            <div className="space-y-4">
+              <svg className="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <h3 className="text-xl font-semibold text-gray-700">No books found</h3>
+              <p className="text-gray-500">Try adjusting your search term</p>
+              <button
+                onClick={() => setSearchTerm("")}
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Clear search
+              </button>
+            </div>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {inventory.map((book) => (
+            {filteredInventory.map((book) => (
               <div key={book._id} className="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow">
                 <div className="space-y-3">
                   <div>
                     <h3 className="font-semibold text-lg text-gray-800 line-clamp-2 leading-tight">
-                      {book.title}
+                      {highlightText(book.title, searchTerm)}
                     </h3>
                     <p className="text-gray-600 text-sm mt-1">
-                      by {book.author}
+                      by {highlightText(book.author, searchTerm)}
                     </p>
                   </div>
                   
