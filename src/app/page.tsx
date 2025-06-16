@@ -495,59 +495,41 @@ export default function Home() {
                 {filteredInventory.map((book) => (
                   <div
                     key={book._id}
-                    className="bg-white rounded-lg shadow-md overflow-hidden transition-all hover:shadow-xl hover:-translate-y-1 border border-slate-200"
+                    className="bg-white rounded-lg shadow-md transition-all hover:shadow-xl hover:-translate-y-1 border border-slate-200 p-6"
                   >
-                    {/* Book Cover Placeholder */}
-                    <div className="aspect-[2/3] bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
-                      <div className="text-slate-400">
-                        <svg
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          className="w-16 h-16"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="1"
-                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-
-                    {/* Book Details */}
-                    <div className="p-4 space-y-3">
+                    <div className="space-y-4">
                       <div>
-                        <h3 className="font-bold text-slate-800 line-clamp-2 leading-tight">
+                        <h3 className="font-bold text-lg text-slate-800 line-clamp-2 leading-tight">
                           {highlightText(book.title, searchTerm)}
                         </h3>
-                        <p className="text-sm text-slate-600 mt-1">
+                        <p className="text-sm text-slate-600 mt-2">
                           by {highlightText(book.author, searchTerm)}
                         </p>
                       </div>
 
-                      {book.subject && (
-                        <div>
-                          <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${getSubjectTagColors(book.subject)}`}>
-                            {book.subject}
-                          </span>
-                        </div>
-                      )}
+                      <div className="space-y-3">
+                        {book.subject && (
+                          <div>
+                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${getSubjectTagColors(book.subject)}`}>
+                              {book.subject}
+                            </span>
+                          </div>
+                        )}
 
-                      {book.gradeLevel && (
-                        <p className="text-xs text-slate-500">
-                          <span className="font-medium">Grade:</span> {book.gradeLevel}
-                        </p>
-                      )}
+                        {book.gradeLevel && (
+                          <p className="text-sm text-slate-500">
+                            <span className="font-medium">Grade:</span> {book.gradeLevel}
+                          </p>
+                        )}
 
-                      {book.series && (
-                        <p className="text-xs text-slate-500">
-                          <span className="font-medium">Series:</span> {book.series}
-                        </p>
-                      )}
+                        {book.series && (
+                          <p className="text-sm text-slate-500">
+                            <span className="font-medium">Series:</span> {book.series}
+                          </p>
+                        )}
+                      </div>
 
-                      <div className="text-xs text-slate-400 pt-2 border-t border-slate-100">
+                      <div className="text-xs text-slate-400 pt-3 border-t border-slate-100">
                         Added {new Date(book.createdAt).toLocaleDateString()}
                       </div>
                     </div>
