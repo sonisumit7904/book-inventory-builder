@@ -90,20 +90,16 @@ Navigate to [http://localhost:3000](http://localhost:3000) to see the applicatio
 ![Image Preview](screenshots/02-image-preview.png)
 *Preview uploaded image and initiate AI analysis with the Extract Details button*
 
-### 3. AI Extraction in Progress
-![AI Processing](screenshots/03-ai-processing.png)
-*Real-time feedback while Google Gemini AI analyzes the book cover*
-
-### 4. Verification Form
-![Edit Form](screenshots/04-verification-form.png)
+### 3. Verification Form
+![Edit Form](screenshots/03-verification-form.png)
 *Review and edit AI-extracted details before saving to inventory*
 
-### 5. Complete Inventory View
-![Inventory Grid](screenshots/05-inventory-view.png)
+### 4. Complete Inventory View
+![Inventory Grid](screenshots/04-inventory-view.png)
 *Responsive grid layout displaying your complete book collection*
 
-### 6. Search Functionality
-![Search Feature](screenshots/06-search-feature.png)
+### 5. Search Functionality
+![Search Feature](screenshots/05-search-feature.png)
 *Real-time search with text highlighting for quick book discovery*
 
 ## �📱 How to Use
