@@ -17,6 +17,8 @@ export default function Home() {
   const [bookDetails, setBookDetails] = useState<BookDetails | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -44,6 +46,7 @@ export default function Home() {
 
     setIsLoading(true);
     setError(null);
+    setSaveMessage(null);
 
     try {
       const formData = new FormData();
@@ -64,6 +67,53 @@ export default function Home() {
       setError(err instanceof Error ? err.message : 'An error occurred while extracting details');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleFormChange = (field: keyof BookDetails, value: string) => {
+    if (bookDetails) {
+      setBookDetails({
+        ...bookDetails,
+        [field]: value
+      });
+    }
+  };
+
+  const handleSaveBook = async () => {
+    if (!bookDetails) return;
+
+    setIsSaving(true);
+    setError(null);
+    setSaveMessage(null);
+
+    try {
+      const response = await fetch('/api/books', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bookDetails),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save book to inventory');
+      }
+
+      const result = await response.json();
+      setSaveMessage('Book saved successfully to inventory!');
+      
+      // Reset form after successful save
+      setTimeout(() => {
+        setBookDetails(null);
+        setImagePreview(null);
+        setFile(null);
+        setSaveMessage(null);
+      }, 2000);
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred while saving the book');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -137,14 +187,101 @@ export default function Home() {
           </div>
         )}
 
+        {saveMessage && (
+          <div className="mt-6 text-center">
+            <p className="text-green-600 bg-green-50 border border-green-200 rounded-md p-3">
+              {saveMessage}
+            </p>
+          </div>
+        )}
+
         {bookDetails && (
           <div className="mt-8 w-full">
-            <h2 className="text-xl font-semibold mb-4 text-center text-gray-700">Verify Details</h2>
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-              <pre className="text-sm text-gray-700 overflow-x-auto whitespace-pre-wrap">
-                {JSON.stringify(bookDetails, null, 2)}
-              </pre>
-            </div>
+            <h2 className="text-xl font-semibold mb-6 text-center text-gray-700">Verify & Edit Details</h2>
+            <form className="space-y-4 bg-white p-6 rounded-lg shadow-md border border-gray-200">
+              <div>
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                  Title *
+                </label>
+                <input
+                  type="text"
+                  id="title"
+                  value={bookDetails.title}
+                  onChange={(e) => handleFormChange('title', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter book title"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="author" className="block text-sm font-medium text-gray-700 mb-1">
+                  Author *
+                </label>
+                <input
+                  type="text"
+                  id="author"
+                  value={bookDetails.author}
+                  onChange={(e) => handleFormChange('author', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter author name"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="gradeLevel" className="block text-sm font-medium text-gray-700 mb-1">
+                  Grade Level
+                </label>
+                <input
+                  type="text"
+                  id="gradeLevel"
+                  value={bookDetails.gradeLevel}
+                  onChange={(e) => handleFormChange('gradeLevel', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., Grades 3-5, Ages 8-12"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+                  Subject/Genre
+                </label>
+                <input
+                  type="text"
+                  id="subject"
+                  value={bookDetails.subject}
+                  onChange={(e) => handleFormChange('subject', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., Fantasy, Science, History"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="series" className="block text-sm font-medium text-gray-700 mb-1">
+                  Series
+                </label>
+                <input
+                  type="text"
+                  id="series"
+                  value={bookDetails.series}
+                  onChange={(e) => handleFormChange('series', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter series name if applicable"
+                />
+              </div>
+
+              <div className="pt-4">
+                <button
+                  type="button"
+                  onClick={handleSaveBook}
+                  disabled={isSaving || !bookDetails.title || !bookDetails.author}
+                  className="w-full px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+                >
+                  {isSaving ? "Saving to Inventory..." : "Save to Inventory"}
+                </button>
+              </div>
+            </form>
           </div>
         )}
       </div>
