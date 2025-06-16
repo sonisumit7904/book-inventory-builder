@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, ChangeEvent, DragEvent, useEffect } from "react";
-import toast from "react-hot-toast";
+import { useState, useEffect, ChangeEvent, DragEvent } from "react";
+import Image from "next/image";
+import { toast } from "react-hot-toast";
 
 // TypeScript interface for book details
 interface BookDetails {
@@ -25,9 +26,7 @@ export default function Home() {
   const [activeSection, setActiveSection] = useState<ActiveSection>("add");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
-  const [bookDetails, setBookDetails] = useState<BookDetails | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [bookDetails, setBookDetails] = useState<BookDetails | null>(null);  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [inventory, setInventory] = useState<Book[]>([]);
   const [isLoadingInventory, setIsLoadingInventory] = useState<boolean>(true);
@@ -56,10 +55,8 @@ export default function Home() {
   }, []);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
+    const selectedFile = e.target.files?.[0];    if (selectedFile) {
       // Reset any previous states
-      setError(null);
       setBookDetails(null);
 
       setFile(selectedFile);
@@ -72,10 +69,8 @@ export default function Home() {
     const droppedFile = e.dataTransfer.files?.[0];
     if (
       droppedFile &&
-      (droppedFile.type === "image/jpeg" || droppedFile.type === "image/png")
-    ) {
+      (droppedFile.type === "image/jpeg" || droppedFile.type === "image/png")    ) {
       // Reset any previous states
-      setError(null);
       setBookDetails(null);
 
       setFile(droppedFile);
@@ -89,11 +84,9 @@ export default function Home() {
     e.preventDefault();
   };
 
-  const handleExtractDetails = async () => {
-    if (!file) return;
+  const handleExtractDetails = async () => {    if (!file) return;
 
     setIsLoading(true);
-    setError(null);
 
     try {
       const formData = new FormData();
@@ -108,14 +101,12 @@ export default function Home() {
         throw new Error("Failed to extract book details");
       }
 
-      const extractedData: BookDetails = await response.json();
-      setBookDetails(extractedData);
+      const extractedData: BookDetails = await response.json();      setBookDetails(extractedData);
       toast.success("Book details extracted successfully!");
     } catch (err) {
       const errorMessage = err instanceof Error
         ? err.message
         : "An error occurred while extracting details";
-      setError(errorMessage);
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -131,11 +122,9 @@ export default function Home() {
     }
   };
 
-  const handleSaveBook = async () => {
-    if (!bookDetails) return;
+  const handleSaveBook = async () => {    if (!bookDetails) return;
 
     setIsSaving(true);
-    setError(null);
 
     try {
       const response = await fetch("/api/books", {
@@ -144,13 +133,11 @@ export default function Home() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(bookDetails),
-      });
-
-      if (!response.ok) {
+      });      if (!response.ok) {
         throw new Error("Failed to save book to inventory");
       }
 
-      const result = await response.json();
+      await response.json();
       toast.success("Book saved successfully to inventory!");      // Refresh inventory after successful save
       await fetchInventory();
 
@@ -337,13 +324,14 @@ export default function Home() {
                       </div>
 
                       {imagePreview && (
-                        <div className="mt-8 space-y-6 animate-fadeIn">
-                          <div className="flex justify-center">
+                        <div className="mt-8 space-y-6 animate-fadeIn">                          <div className="flex justify-center">
                             <div className="relative group">
-                              <img
+                              <Image
                                 src={imagePreview}
                                 alt="Book cover preview"
-                                className="max-w-72 max-h-96 rounded-2xl shadow-2xl border-4 border-white/20 transform group-hover:scale-105 transition-transform duration-300"
+                                width={288}
+                                height={384}
+                                className="max-w-72 max-h-96 rounded-2xl shadow-2xl border-4 border-white/20 transform group-hover:scale-105 transition-transform duration-300 object-cover"
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             </div>
@@ -379,13 +367,14 @@ export default function Home() {
                         <h3 className="text-xl font-bold text-white mb-2">Uploaded Cover</h3>
                         <p className="text-slate-300">Ready for verification</p>
                       </div>
-                      
-                      <div className="flex justify-center mb-6">
+                        <div className="flex justify-center mb-6">
                         <div className="relative group">
-                          <img
+                          <Image
                             src={imagePreview!}
                             alt="Book cover preview"
-                            className="max-w-56 max-h-72 rounded-xl shadow-xl border-2 border-white/20 transform group-hover:scale-105 transition-transform duration-300"
+                            width={224}
+                            height={288}
+                            className="max-w-56 max-h-72 rounded-xl shadow-xl border-2 border-white/20 transform group-hover:scale-105 transition-transform duration-300 object-cover"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </div>
