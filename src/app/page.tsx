@@ -2,9 +2,21 @@
 
 import { useState, ChangeEvent, DragEvent } from "react";
 
+// TypeScript interface for book details
+interface BookDetails {
+  title: string;
+  author: string;
+  gradeLevel: string;
+  subject: string;
+  series: string;
+}
+
 export default function Home() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [bookDetails, setBookDetails] = useState<BookDetails | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -25,6 +37,34 @@ export default function Home() {
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+  };
+
+  const handleExtractDetails = async () => {
+    if (!file) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch('/api/extract', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to extract book details');
+      }
+
+      const extractedData: BookDetails = await response.json();
+      setBookDetails(extractedData);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred while extracting details');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -67,6 +107,43 @@ export default function Home() {
                 alt="Book cover preview"
                 className="max-w-xs max-h-80 rounded-lg shadow-lg border border-gray-200"
               />
+            </div>
+            <div className="text-center mt-6">
+              <button
+                onClick={handleExtractDetails}
+                disabled={!file || isLoading}
+                className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium"
+              >
+                {isLoading ? "Analyzing..." : "Extract Details"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {isLoading && (
+          <div className="mt-6 text-center">
+            <div className="inline-flex items-center space-x-2">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              <p className="text-blue-600 font-medium">AI is analyzing the image...</p>
+            </div>
+          </div>
+        )}
+
+        {error && (
+          <div className="mt-6 text-center">
+            <p className="text-red-500 bg-red-50 border border-red-200 rounded-md p-3">
+              {error}
+            </p>
+          </div>
+        )}
+
+        {bookDetails && (
+          <div className="mt-8 w-full">
+            <h2 className="text-xl font-semibold mb-4 text-center text-gray-700">Verify Details</h2>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <pre className="text-sm text-gray-700 overflow-x-auto whitespace-pre-wrap">
+                {JSON.stringify(bookDetails, null, 2)}
+              </pre>
             </div>
           </div>
         )}
